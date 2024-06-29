@@ -61,20 +61,20 @@ def create_message(incident):
 
 
 def ident_location(json, number, api_key, street):
-    print(send_message(create_message(json[0]), api_key, number))
+    #print(send_message(create_message(json[0]), api_key, number))
     for incident in json:
         if incident["location"] == street:
             text_info = create_message(incident)
-            send_message(text_info, api_key, number)
+            send_message(text_info, api_key, number, street)
 
 
-def send_message(info, apiKey, number):
+def send_message(info, apiKey, number, street):
     return requests.post(
         "https://api.mailgun.net/v3/alert.brianmwiebe.com/messages",
         auth=("api", apiKey),
         data={"from": "mailgun@alert.brianmwiebe.com",
               "to": number,
-              "subject": "Test",
+              "subject": "Alert for " + street,
               "text": info})
 
 
