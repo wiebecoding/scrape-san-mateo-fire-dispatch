@@ -6,8 +6,6 @@ import datetime
 import pytz
 import argparse
 
-from twilio.rest import Client
-
 url = "http://www.firedispatch.com/iPhoneActiveIncident.asp?Agency=04100"
 
 
