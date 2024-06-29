@@ -4,7 +4,6 @@ import httpx
 import json
 import datetime
 import pytz
-import config
 import argparse
 
 from twilio.rest import Client
