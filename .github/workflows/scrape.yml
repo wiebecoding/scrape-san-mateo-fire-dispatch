@@ -4,7 +4,7 @@ on:
   push:
   workflow_dispatch:
   schedule:
-  - cron: '*/20 * * * *'
+  - cron: '*/5 * * * *'
 
 jobs:
   scheduled:
@@ -20,12 +20,4 @@ jobs:
         cache: 'pip'
     - run: pip install -r requirements.txt
     - name: Fetch latest data
-      run: python scrape.py
-    - name: Commit and push if it changed
-      run: |-
-        git config user.name "Automated"
-        git config user.email "actions@users.noreply.github.com"
-        git add -A
-        timestamp=$(date -u)
-        git commit -m "Latest data: ${timestamp}" || exit 0
-        git push
+      run: python scrape.py -s "${{ secrets.STREET }}" -n "${{ secrets.NUMBER }}" -a "${{ secrets.MAILGUN_API_KEY }}"

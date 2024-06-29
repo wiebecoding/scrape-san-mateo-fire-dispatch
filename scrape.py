@@ -1,8 +1,13 @@
+import requests
 from bs4 import BeautifulSoup as Soup
 import httpx
 import json
 import datetime
 import pytz
+import config
+import argparse
+
+from twilio.rest import Client
 
 url = "http://www.firedispatch.com/iPhoneActiveIncident.asp?Agency=04100"
 
@@ -53,7 +58,34 @@ def scrape_page(url):
     return html, events
 
 
+def create_message(incident):
+    info = "Incident Identified: " + incident["category"] + " at time " + incident["time"] + " with dept " + incident["summary"] + " at " + incident["location"] + ". Note: This is an address on the street, not necessarily at Nonnie and Pa's"
+    return info
+
+
+def ident_location(json, number, api_key, street):
+    print(send_message(create_message(json[0]), api_key, number))
+    for incident in json:
+        if incident["location"] == street:
+            text_info = create_message(incident)
+            send_message(text_info, api_key, number)
+
+
+def send_message(info, apiKey, number):
+    return requests.post(
+        "https://api.mailgun.net/v3/alert.brianmwiebe.com/messages",
+        auth=("api", apiKey),
+        data={"from": "mailgun@alert.brianmwiebe.com",
+              "to": number,
+              "subject": "Test",
+              "text": info})
+
+
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--street", help="Street Name", required=True)
+    parser.add_argument("-n", "--number", help="Phone Number in email form", required=True)
+    parser.add_argument("-a", "--apikey", help="API Key", required=True)
+    args = parser.parse_args()
     html, events = scrape_page(url)
-    open("incidents.html", "w").write(html)
-    open("incidents.json", "w").write(json.dumps(events, indent=4))
+    ident_location(events, args.number, args.apikey, args.street)
